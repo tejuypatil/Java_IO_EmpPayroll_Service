@@ -1,33 +1,39 @@
-import java.util.ArrayList;
+import java.io.IOException;
+
 import java.util.List;
-import java.util.Scanner;
+
 
 public class EmployeePayrollService {
-    private final List<EmployeePayrollData>employeePayrollList;
+    List<EmployeePayrollData> employeePayrollDataList;
 
-    public EmployeePayrollService(List<EmployeePayrollData> employeePayrollList) {
-        this.employeePayrollList = employeePayrollList;
+    public enum IOService{
+        CONSOLE_IO, FILE_IO
     }
-    private void readEmployeePayrollData(Scanner consoleInputReader){
-        System.out.println("Enter Employee ID: ");
-        int id = consoleInputReader.nextInt();
-
-        System.out.println("Enter Employee Name: ");
-        String name = consoleInputReader.next();
-
-        System.out.println("Enter Employee Salary: ");
-        double salary = consoleInputReader.nextDouble();
-        employeePayrollList.add(new EmployeePayrollData(id,name,salary));
-    }
-    private void writeEmployeePayrollData(){
-        System.out.println("\nWriting Employee payroll o console\n "+employeePayrollList);
+    public EmployeePayrollService(List<EmployeePayrollData> employeePayrollDataList) {
+        this.employeePayrollDataList = employeePayrollDataList;
     }
 
-    public static void main(String[] args) {
-        ArrayList<EmployeePayrollData>employeePayrollList = new ArrayList<>();
-        EmployeePayrollService employeePayrollService = new EmployeePayrollService(employeePayrollList);
-        Scanner consoleInputReader = new Scanner(System.in);
-        employeePayrollService.readEmployeePayrollData(consoleInputReader);
-        employeePayrollService.writeEmployeePayrollData();
+    void writeEmployeePayrollData(IOService ioService) throws IOException {
+        PayrollService payrollService=getEmployeePayrollObject(ioService);
+        payrollService.writePayrollData(employeePayrollDataList);
+    }
+    void readEmployeePayrollData(IOService ioService) throws IOException {
+        PayrollService payrollService=getEmployeePayrollObject(ioService);
+        payrollService.readPayrollData();
+    }
+    public long countEmployeePayrollData(IOService ioService) throws IOException {
+        PayrollService payrollService = getEmployeePayrollObject(ioService);
+        return payrollService.countEntries();
+    }
+
+    private PayrollService getEmployeePayrollObject(IOService ioService) {
+        PayrollService payrollService = null;
+        if(IOService.FILE_IO.equals(ioService)){
+            payrollService = new FileIOServiceImpl();
+        }
+        else if(IOService.CONSOLE_IO.equals(ioService)){
+            payrollService = new ConsoleIOServiceImpl();
+        }
+        return payrollService;
     }
 }
